@@ -1,0 +1,3 @@
+rootProject.name = 'sealmenus'
+
+include 'sealmenus-bukkit', 'sealmenus-sponge'

@@ -239,8 +239,10 @@ public class PageableChestMenu extends ChestMenu {
 
     @Override
     public void open(Player player) {
-        if(this.inventory == null || !super.hasViewers()) super.open(player);
-        else new PageableChestMenu(this).open(player);
+        if(this.inventory == null || !super.hasViewers()) {
+            this.page = 0;
+            super.open(player);
+        } else new PageableChestMenu(this).open(player);
     }
 
     @Override

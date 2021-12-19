@@ -17,6 +17,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
@@ -294,14 +295,19 @@ public class ChestMenu {
 
     protected void handlesUpdateItemsTask() {
         if(this.updateItemsTask == null && hasViewers())
-            updateItemsTask = Bukkit.getScheduler().runTaskTimer(this.plugin, () -> items.forEach((slot, item) -> {
-                if(item.update()) requireUpdate(slot);
-                handlesUpdateItemsTask();
-            }), 1, 1);
-        else if(this.updateItemsTask != null && !hasViewers()) {
-            this.updateItemsTask.cancel();
-            this.updateItemsTask = null;
-        }
+            updateItemsTask = new BukkitRunnable() {
+                @Override
+                public void run() {
+                    items.forEach((slot, item) -> {
+                        if (item.update()) requireUpdate(slot);
+                    });
+
+                    if(!hasViewers()) {
+                        this.cancel();
+                        updateItemsTask = null;
+                    }
+                }
+            }.runTaskTimer(this.plugin, 1, 1);
     }
 
     @RequiredArgsConstructor

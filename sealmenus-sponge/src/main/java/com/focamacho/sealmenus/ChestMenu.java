@@ -53,7 +53,7 @@ public class ChestMenu {
 
     //Sponge Inventory
     @Getter protected Inventory inventory;
-    protected List<Container> containers = Lists.newArrayList();
+    protected List<Player> playersViewing = Lists.newArrayList();
     protected final Set<Integer> slotsRequiringUpdate = Sets.newHashSet();
     private Task updateItemsTask = null;
 
@@ -242,6 +242,7 @@ public class ChestMenu {
                             Task.builder().execute(this::handlesUpdateItemsTask).submit(this.plugin);
                         } else if(ie instanceof InteractInventoryEvent.Close) {
                             this.getOnClose().accept((InteractInventoryEvent.Close) ie);
+                            if(ie.getSource() instanceof Player) playersViewing.remove((Player) ie.getSource());
                         }
                     })
                     .build(this.plugin);
@@ -309,14 +310,13 @@ public class ChestMenu {
      */
     public void open(Player player) {
         if(this.inventory == null) update();
-        else containers.removeIf(container -> !container.hasViewers());
 
         Task.builder().execute(() -> {
             if(slotsRequiringUpdate.size() > 0)
                 if(slotsRequiringUpdate.contains(null)) update();
                 else slotsRequiringUpdate.forEach(this::update);
             player.closeInventory();
-            player.openInventory(this.inventory).ifPresent(container -> containers.add(container));
+            player.openInventory(this.inventory).ifPresent(container -> playersViewing.add(player));
         }).submit(this.plugin);
     }
 
@@ -327,8 +327,7 @@ public class ChestMenu {
      * menu.
      */
     public boolean hasViewers() {
-        containers.removeIf(container -> !container.hasViewers());
-        return containers.stream().anyMatch(Container::hasViewers);
+        return playersViewing.size() > 0;
     }
 
     /**
@@ -358,14 +357,16 @@ public class ChestMenu {
 
     protected void handlesUpdateItemsTask() {
         if(this.updateItemsTask == null && hasViewers())
-            updateItemsTask = Task.builder().intervalTicks(1).execute(() -> items.forEach((slot, item) -> {
-                if(item.update()) requireUpdate(slot);
-                handlesUpdateItemsTask();
-            })).submit(this.plugin);
-        else if(this.updateItemsTask != null && !hasViewers()) {
-            this.updateItemsTask.cancel();
-            this.updateItemsTask = null;
-        }
+            updateItemsTask = Task.builder().intervalTicks(1).execute((task) -> {
+                items.forEach((slot, item) -> {
+                    if(item.update()) requireUpdate(slot);
+                });
+
+                if(!hasViewers()) {
+                    task.cancel();
+                    this.updateItemsTask = null;
+                }
+            }).submit(this.plugin);
     }
 
 }

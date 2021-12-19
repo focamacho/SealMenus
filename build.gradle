@@ -12,9 +12,9 @@ subprojects {
         annotationProcessor 'org.projectlombok:lombok:1.18.22'
     }
 
-    def targetJavaVersion = property('javaVersion') as int
+    def targetJavaVersion = 1.8
     java {
-        def javaVersion = JavaVersion.VERSION_1_8
+        def javaVersion = JavaVersion.toVersion(targetJavaVersion)
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
         if (JavaVersion.current() < javaVersion) {

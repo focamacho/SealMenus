@@ -14,7 +14,7 @@ subprojects {
 
     def targetJavaVersion = property('javaVersion') as int
     java {
-        def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+        def javaVersion = JavaVersion.VERSION_1_8
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
         if (JavaVersion.current() < javaVersion) {

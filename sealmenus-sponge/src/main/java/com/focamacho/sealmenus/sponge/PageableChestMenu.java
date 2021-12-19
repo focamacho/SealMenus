@@ -132,8 +132,10 @@ public class PageableChestMenu extends ChestMenu {
                 .setOnPrimary(click -> {
                     if(click.getSource() instanceof Player) {
                         Task.builder().execute(() -> {
-                            this.page += 1;
-                            update();
+                            if(this.page + 1 < getPageCount()) {
+                                this.page += 1;
+                                update();
+                            }
                         }).submit(this.plugin);
                     }
                 })
@@ -167,8 +169,10 @@ public class PageableChestMenu extends ChestMenu {
                 .setOnPrimary(click -> {
                     if(click.getSource() instanceof Player) {
                         Task.builder().execute(() -> {
-                            this.page -= 1;
-                            update();
+                            if(this.page > 0) {
+                                this.page -= 1;
+                                update();
+                            }
                         }).submit(this.plugin);
                     }
                 })

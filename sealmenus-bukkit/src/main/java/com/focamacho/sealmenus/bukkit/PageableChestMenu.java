@@ -134,8 +134,10 @@ public class PageableChestMenu extends ChestMenu {
                 .setOnPrimary(click -> {
                     if(click.getWhoClicked() instanceof Player) {
                         Bukkit.getScheduler().runTask(this.plugin, () -> {
-                            this.page += 1;
-                            update();
+                            if(this.page + 1 < getPageCount()) {
+                                this.page += 1;
+                                update();
+                            }
                         });
                     }
                 })
@@ -169,8 +171,10 @@ public class PageableChestMenu extends ChestMenu {
                 .setOnPrimary(click -> {
                     if(click.getWhoClicked() instanceof Player) {
                         Bukkit.getScheduler().runTask(this.plugin, () -> {
-                            this.page -= 1;
-                            update();
+                            if(this.page > 0) {
+                                this.page -= 1;
+                                update();
+                            }
                         });
                     }
                 })

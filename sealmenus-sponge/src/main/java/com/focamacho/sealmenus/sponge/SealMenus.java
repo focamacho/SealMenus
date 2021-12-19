@@ -1,4 +1,4 @@
-package com.focamacho.sealmenus;
+package com.focamacho.sealmenus.sponge;
 
 public class SealMenus {
 

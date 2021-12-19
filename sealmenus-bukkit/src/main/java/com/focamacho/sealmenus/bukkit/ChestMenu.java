@@ -1,7 +1,7 @@
-package com.focamacho.sealmenus;
+package com.focamacho.sealmenus.bukkit;
 
-import com.focamacho.sealmenus.item.ClickableItem;
-import com.focamacho.sealmenus.item.MenuItem;
+import com.focamacho.sealmenus.bukkit.item.ClickableItem;
+import com.focamacho.sealmenus.bukkit.item.MenuItem;
 import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

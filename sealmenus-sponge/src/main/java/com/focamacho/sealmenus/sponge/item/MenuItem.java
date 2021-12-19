@@ -1,4 +1,4 @@
-package com.focamacho.sealmenus.item;
+package com.focamacho.sealmenus.sponge.item;
 
 import lombok.*;
 import lombok.experimental.Accessors;

@@ -1,7 +1,7 @@
-package com.focamacho.sealmenus;
+package com.focamacho.sealmenus.sponge;
 
-import com.focamacho.sealmenus.item.ClickableItem;
-import com.focamacho.sealmenus.item.MenuItem;
+import com.focamacho.sealmenus.sponge.item.ClickableItem;
+import com.focamacho.sealmenus.sponge.item.MenuItem;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import org.spongepowered.api.entity.living.player.Player;

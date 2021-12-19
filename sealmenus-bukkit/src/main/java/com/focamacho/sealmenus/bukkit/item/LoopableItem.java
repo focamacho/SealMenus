@@ -1,4 +1,4 @@
-package com.focamacho.sealmenus.item;
+package com.focamacho.sealmenus.bukkit.item;
 
 import lombok.Getter;
 import lombok.NonNull;

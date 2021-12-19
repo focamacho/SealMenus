@@ -1,4 +1,4 @@
-package com.focamacho.sealmenus.item;
+package com.focamacho.sealmenus.bukkit.item;
 
 import lombok.NonNull;
 import org.bukkit.inventory.ItemStack;

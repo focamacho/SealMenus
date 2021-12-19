@@ -1,4 +1,4 @@
-package com.focamacho.sealmenus;
+package com.focamacho.sealmenus.bukkit;
 
 import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;

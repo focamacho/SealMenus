@@ -1,9 +1,11 @@
-group = 'com.focamacho'
-version = '1.0'
+allprojects {
+    group = 'com.focamacho'
+    version = '1.0'
+}
 
 subprojects {
     apply plugin: 'java-library'
-    apply plugin: 'maven-publish'
+    apply plugin: 'maven'
 
     dependencies {
         compileOnly 'org.projectlombok:lombok:1.18.22'

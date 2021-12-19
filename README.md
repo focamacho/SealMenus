@@ -80,6 +80,8 @@ public class ExamplePlugin {
     
 }
 ```
+<br>Result:<br><br>
+![coolmenu1](https://user-images.githubusercontent.com/48870573/146666105-34255fd7-ef23-4539-a61b-a1e813db73b6.gif)
 
 ### Pageable Chest Menus
 
@@ -123,3 +125,5 @@ public class ExamplePlugin {
     
 }
 ```
+<br>Result:<br><br>
+![coolmenu2](https://user-images.githubusercontent.com/48870573/146666130-f23ebc5d-9745-42f9-bda7-d7ce56d4df07.gif)

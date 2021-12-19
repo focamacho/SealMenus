@@ -2,7 +2,7 @@
 API for creating Inventory Menus for Bukkit and Sponge.
 
 ## Index
-Atalhos para certas seções desse documento.
+
 - [Seal Menus](#Seal-Menus)
     * [First Steps](#First-Steps)
     * [Using the API](#Using-the-API)

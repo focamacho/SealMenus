@@ -1,6 +1,5 @@
 package com.focamacho.sealmenus;
 
-import com.focamacho.sealmenus.listener.InventoryListener;
 import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -9,7 +8,7 @@ import java.util.Map;
 
 public final class SealMenus {
 
-    static final Map<Object, InventoryListener> registeredListeners = Maps.newHashMap();
+    static final Map<JavaPlugin, ChestMenu.Listener> registeredListeners = Maps.newHashMap();
 
     /**
      * Creates a chest menu.
@@ -44,7 +43,7 @@ public final class SealMenus {
 
     private static void registerListener(JavaPlugin plugin) {
         if(!registeredListeners.containsKey(plugin)) {
-            InventoryListener listener = new InventoryListener(plugin);
+            ChestMenu.Listener listener = new ChestMenu.Listener(plugin);
             Bukkit.getPluginManager().registerEvents(listener, plugin);
             registeredListeners.put(plugin, listener);
         }

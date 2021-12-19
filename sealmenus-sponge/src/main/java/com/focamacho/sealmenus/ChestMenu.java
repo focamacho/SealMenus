@@ -52,10 +52,10 @@ public class ChestMenu {
     protected Map<Integer, MenuItem> items = new HashMap<>();
 
     //Sponge Inventory
-    @Getter private Inventory inventory;
-    private List<Container> containers = Lists.newArrayList();
+    @Getter protected Inventory inventory;
+    protected List<Container> containers = Lists.newArrayList();
+    protected final Set<Integer> slotsRequiringUpdate = Sets.newHashSet();
     private Task updateItemsTask = null;
-    private final Set<Integer> slotsRequiringUpdate = Sets.newHashSet();
 
     ChestMenu(String title, int rows, Object plugin) {
         if(rows <= 0 || rows > 6) throw new IllegalArgumentException("The number of rows for a menu must be >= 1 && <= 6.");
@@ -200,37 +200,37 @@ public class ChestMenu {
                             if(slot < 9 * this.rows) {
                                 ce.setCancelled(true);
 
-                                this.onClick.accept(ce);
+                                this.getOnClick().accept(ce);
 
                                 MenuItem item = getItem(slot);
                                 if(item == null) item = dummyItem;
 
                                 if(ce instanceof ClickInventoryEvent.Double) {
-                                    onDouble.accept((ClickInventoryEvent.Double) ce);
+                                    this.getOnDouble().accept((ClickInventoryEvent.Double) ce);
                                     item.getOnDouble().accept((ClickInventoryEvent.Double) ce);
                                 } else if(ce instanceof ClickInventoryEvent.Shift.Primary) {
-                                    onShiftPrimary.accept((ClickInventoryEvent.Shift.Primary) ce);
+                                    this.getOnShiftPrimary().accept((ClickInventoryEvent.Shift.Primary) ce);
                                     item.getOnShiftPrimary().accept((ClickInventoryEvent.Shift.Primary) ce);
                                 } else if(ce instanceof ClickInventoryEvent.Shift.Secondary) {
-                                    onShiftSecondary.accept((ClickInventoryEvent.Shift.Secondary) ce);
+                                    this.getOnShiftSecondary().accept((ClickInventoryEvent.Shift.Secondary) ce);
                                     item.getOnShiftSecondary().accept((ClickInventoryEvent.Shift.Secondary) ce);
                                 } else if(ce instanceof ClickInventoryEvent.Primary) {
-                                    onPrimary.accept((ClickInventoryEvent.Primary) ce);
+                                    this.getOnPrimary().accept((ClickInventoryEvent.Primary) ce);
                                     item.getOnPrimary().accept((ClickInventoryEvent.Primary) ce);
                                 } else if(ce instanceof ClickInventoryEvent.Middle) {
-                                    onMiddle.accept((ClickInventoryEvent.Middle) ce);
+                                    this.getOnMiddle().accept((ClickInventoryEvent.Middle) ce);
                                     item.getOnMiddle().accept((ClickInventoryEvent.Middle) ce);
                                 } else if(ce instanceof ClickInventoryEvent.Secondary) {
-                                    onSecondary.accept((ClickInventoryEvent.Secondary) ce);
+                                    this.getOnSecondary().accept((ClickInventoryEvent.Secondary) ce);
                                     item.getOnSecondary().accept((ClickInventoryEvent.Secondary) ce);
                                 } else if(ce instanceof ClickInventoryEvent.Drop.Full) {
-                                    onDropAll.accept((ClickInventoryEvent.Drop.Full) ce);
+                                    this.getOnDropAll().accept((ClickInventoryEvent.Drop.Full) ce);
                                     item.getOnDropAll().accept((ClickInventoryEvent.Drop.Full) ce);
                                 } else if(ce instanceof ClickInventoryEvent.Drop) {
-                                    onDrop.accept((ClickInventoryEvent.Drop.Single) ce);
+                                    this.getOnDrop().accept((ClickInventoryEvent.Drop.Single) ce);
                                     item.getOnDrop().accept((ClickInventoryEvent.Drop.Single) ce);
                                 } else if(ce instanceof ClickInventoryEvent.NumberPress) {
-                                    onNumber.accept((ClickInventoryEvent.NumberPress) ce);
+                                    this.getOnNumber().accept((ClickInventoryEvent.NumberPress) ce);
                                     item.getOnNumber().accept((ClickInventoryEvent.NumberPress) ce);
                                 }
                             }
@@ -238,21 +238,10 @@ public class ChestMenu {
                     })
                     .listener(InteractInventoryEvent.class, ie -> {
                         if(ie instanceof InteractInventoryEvent.Open) {
-                            if(updateItemsTask == null) updateItemsTask = Task.builder().intervalTicks(1).execute(() -> items.forEach((slot, item) -> {
-                                if(item.update()) update(slot);
-                            })).submit(this.plugin);
-
-                            onOpen.accept((InteractInventoryEvent.Open) ie);
+                            this.getOnOpen().accept((InteractInventoryEvent.Open) ie);
+                            Task.builder().execute(this::handlesUpdateItemsTask).submit(this.plugin);
                         } else if(ie instanceof InteractInventoryEvent.Close) {
-                            if(updateItemsTask != null &&
-                                    (!ie.getTargetInventory().hasViewers() ||
-                                    (ie.getTargetInventory().getViewers().size() == 1 && ie.getTargetInventory().getViewers().contains((Player) ie.getSource())))
-                            ) {
-                                updateItemsTask.cancel();
-                                updateItemsTask = null;
-                            }
-
-                            onClose.accept((InteractInventoryEvent.Close) ie);
+                            this.getOnClose().accept((InteractInventoryEvent.Close) ie);
                         }
                     })
                     .build(this.plugin);
@@ -308,10 +297,10 @@ public class ChestMenu {
      */
     public void requireUpdate(Integer slot) {
         if(this.inventory != null) {
-            if(containers.stream().anyMatch(Container::hasViewers))
+            if(hasViewers())
                 if(slot == null) update();
                 else update(slot);
-            else slotsRequiringUpdate.add(slot);
+            else this.slotsRequiringUpdate.add(slot);
         }
     }
 
@@ -332,27 +321,51 @@ public class ChestMenu {
     }
 
     /**
+     * Returns if someone is viewing this menu.
+     *
+     * @return true if there is a player using this
+     * menu.
+     */
+    public boolean hasViewers() {
+        containers.removeIf(container -> !container.hasViewers());
+        return containers.stream().anyMatch(Container::hasViewers);
+    }
+
+    /**
      * Creates a copy of this menu.
      * @return the copy of this menu.
      */
     public ChestMenu copy() {
         ChestMenu copy = new ChestMenu(this.title, this.rows, this.plugin);
 
-        copy.setOnOpen(getOnOpen());
-        copy.setOnClose(getOnClose());
+        copy.setOnOpen(this.getOnOpen());
+        copy.setOnClose(this.getOnClose());
 
-        copy.setOnPrimary(getOnPrimary());
-        copy.setOnSecondary(getOnSecondary());
-        copy.setOnDrop(getOnDrop());
-        copy.setOnDropAll(getOnDropAll());
-        copy.setOnMiddle(getOnMiddle());
-        copy.setOnNumber(getOnNumber());
-        copy.setOnShiftPrimary(getOnShiftPrimary());
-        copy.setOnShiftSecondary(getOnShiftSecondary());
-        copy.setOnDouble(getOnDouble());
+        copy.setOnClick(this.getOnClick());
+        copy.setOnPrimary(this.getOnPrimary());
+        copy.setOnSecondary(this.getOnSecondary());
+        copy.setOnDrop(this.getOnDrop());
+        copy.setOnDropAll(this.getOnDropAll());
+        copy.setOnMiddle(this.getOnMiddle());
+        copy.setOnNumber(this.getOnNumber());
+        copy.setOnShiftPrimary(this.getOnShiftPrimary());
+        copy.setOnShiftSecondary(this.getOnShiftSecondary());
+        copy.setOnDouble(this.getOnDouble());
 
         getItems().forEach((slot, item) -> copy.addItem(item.copy(), slot));
         return copy;
+    }
+
+    protected void handlesUpdateItemsTask() {
+        if(this.updateItemsTask == null && hasViewers())
+            updateItemsTask = Task.builder().intervalTicks(1).execute(() -> items.forEach((slot, item) -> {
+                if(item.update()) requireUpdate(slot);
+                handlesUpdateItemsTask();
+            })).submit(this.plugin);
+        else if(this.updateItemsTask != null && !hasViewers()) {
+            this.updateItemsTask.cancel();
+            this.updateItemsTask = null;
+        }
     }
 
 }

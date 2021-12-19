@@ -4,17 +4,20 @@ import com.focamacho.sealmenus.item.ClickableItem;
 import com.focamacho.sealmenus.item.MenuItem;
 import com.google.common.collect.Sets;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -47,9 +50,10 @@ public class ChestMenu {
     //Items
     protected Map<Integer, MenuItem> items = new HashMap<>();
 
-    //Sponge Inventory
-    @Getter private Inventory inventory;
-    private final Set<Integer> slotsRequiringUpdate = Sets.newHashSet();
+    //Bukkit Inventory
+    @Getter protected Inventory inventory;
+    protected final Set<Integer> slotsRequiringUpdate = Sets.newHashSet();
+    private BukkitTask updateItemsTask = null;
 
     ChestMenu(String title, int rows, JavaPlugin plugin) {
         if(rows <= 0 || rows > 6) throw new IllegalArgumentException("The number of rows for a menu must be >= 1 && <= 6.");
@@ -227,10 +231,10 @@ public class ChestMenu {
      */
     public void requireUpdate(Integer slot) {
         if(this.inventory != null) {
-            if(this.inventory.getViewers().size() > 0)
+            if(hasViewers())
                 if(slot == null) update();
                 else update(slot);
-            else slotsRequiringUpdate.add(slot);
+            else this.slotsRequiringUpdate.add(slot);
         }
     }
 
@@ -245,10 +249,22 @@ public class ChestMenu {
                 else slotsRequiringUpdate.forEach(this::update);
             }
 
-            SealMenus.registeredListeners.put(this, null);
+            Listener listener = SealMenus.registeredListeners.get(this.plugin);
+            if(listener != null) listener.chestMenus.add(this);
+
             player.closeInventory();
             player.openInventory(this.inventory);
         });
+    }
+
+    /**
+     * Returns if someone is viewing this menu.
+     *
+     * @return true if there is a player using this
+     * menu.
+     */
+    public boolean hasViewers() {
+        return this.inventory.getViewers().size() > 0;
     }
 
     /**
@@ -258,21 +274,128 @@ public class ChestMenu {
     public ChestMenu copy() {
         ChestMenu copy = new ChestMenu(this.title, this.rows, this.plugin);
 
-        copy.setOnOpen(getOnOpen());
-        copy.setOnClose(getOnClose());
+        copy.setOnOpen(this.getOnOpen());
+        copy.setOnClose(this.getOnClose());
 
-        copy.setOnPrimary(getOnPrimary());
-        copy.setOnSecondary(getOnSecondary());
-        copy.setOnDrop(getOnDrop());
-        copy.setOnDropAll(getOnDropAll());
-        copy.setOnMiddle(getOnMiddle());
-        copy.setOnNumber(getOnNumber());
-        copy.setOnShiftPrimary(getOnShiftPrimary());
-        copy.setOnShiftSecondary(getOnShiftSecondary());
-        copy.setOnDouble(getOnDouble());
+        copy.setOnClick(this.getOnClick());
+        copy.setOnPrimary(this.getOnPrimary());
+        copy.setOnSecondary(this.getOnSecondary());
+        copy.setOnDrop(this.getOnDrop());
+        copy.setOnDropAll(this.getOnDropAll());
+        copy.setOnMiddle(this.getOnMiddle());
+        copy.setOnNumber(this.getOnNumber());
+        copy.setOnShiftPrimary(this.getOnShiftPrimary());
+        copy.setOnShiftSecondary(this.getOnShiftSecondary());
+        copy.setOnDouble(this.getOnDouble());
 
         getItems().forEach((slot, item) -> copy.addItem(item.copy(), slot));
         return copy;
+    }
+
+    protected void handlesUpdateItemsTask() {
+        if(this.updateItemsTask == null && hasViewers())
+            updateItemsTask = Bukkit.getScheduler().runTaskTimer(this.plugin, () -> items.forEach((slot, item) -> {
+                if(item.update()) requireUpdate(slot);
+                handlesUpdateItemsTask();
+            }), 1, 1);
+        else if(this.updateItemsTask != null && !hasViewers()) {
+            this.updateItemsTask.cancel();
+            this.updateItemsTask = null;
+        }
+    }
+
+    @RequiredArgsConstructor
+    static class Listener implements org.bukkit.event.Listener {
+
+        private static final MenuItem dummyItem = ClickableItem.create(new ItemStack(Material.AIR));
+
+        private final JavaPlugin plugin;
+        private final Set<ChestMenu> chestMenus = Sets.newHashSet();
+
+        @EventHandler
+        public void onClick(InventoryClickEvent ce) {
+            for (ChestMenu chestMenu : chestMenus) {
+                if(chestMenu.getInventory() == ce.getInventory()) {
+                    int slot = ce.getSlot();
+                    if (slot < 9 * chestMenu.getRows()) {
+                        ce.setCancelled(true);
+
+                        chestMenu.getOnClick().accept(ce);
+
+                        MenuItem item = chestMenu.getItem(slot);
+                        if (item == null) item = dummyItem;
+
+                        switch (ce.getClick()) {
+                            case DOUBLE_CLICK:
+                                chestMenu.getOnDouble().accept(ce);
+                                item.getOnDouble().accept(ce);
+                                break;
+                            case SHIFT_LEFT:
+                                chestMenu.getOnShiftPrimary().accept(ce);
+                                item.getOnShiftPrimary().accept(ce);
+                                break;
+                            case SHIFT_RIGHT:
+                                chestMenu.getOnShiftSecondary().accept(ce);
+                                item.getOnShiftSecondary().accept(ce);
+                                break;
+                            case LEFT:
+                                chestMenu.getOnPrimary().accept(ce);
+                                item.getOnPrimary().accept(ce);
+                                break;
+                            case MIDDLE:
+                                chestMenu.getOnMiddle().accept(ce);
+                                item.getOnMiddle().accept(ce);
+                                break;
+                            case RIGHT:
+                                chestMenu.getOnSecondary().accept(ce);
+                                item.getOnSecondary().accept(ce);
+                                break;
+                            case CONTROL_DROP:
+                                chestMenu.getOnDropAll().accept(ce);
+                                item.getOnDropAll().accept(ce);
+                                break;
+                            case DROP:
+                                chestMenu.getOnDrop().accept(ce);
+                                item.getOnDrop().accept(ce);
+                                break;
+                            case NUMBER_KEY:
+                                chestMenu.getOnNumber().accept(ce);
+                                item.getOnNumber().accept(ce);
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        @EventHandler
+        public void onOpen(InventoryOpenEvent ie) {
+            for (ChestMenu menu : chestMenus) {
+                if (menu.getInventory() == ie.getInventory()) {
+                    menu.getOnOpen().accept(ie);
+                    Bukkit.getScheduler().runTask(this.plugin, menu::handlesUpdateItemsTask);
+                    break;
+                }
+            }
+        }
+
+        @EventHandler
+        public void onClose(InventoryCloseEvent ie) {
+            Iterator<ChestMenu> iterator = chestMenus.iterator();
+
+            while (iterator.hasNext()) {
+                ChestMenu menu = iterator.next();
+                if (ie.getInventory() == menu.getInventory()) {
+                    menu.getOnClose().accept(ie);
+                    Bukkit.getScheduler().runTask(this.plugin, () -> {
+                        if (!menu.hasViewers()) iterator.remove();
+                    });
+                    break;
+                }
+            }
+        }
+
     }
 
 }

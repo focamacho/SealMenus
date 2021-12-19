@@ -321,7 +321,7 @@ public class ChestMenu {
         @EventHandler
         public void onClick(InventoryClickEvent ce) {
             for (ChestMenu chestMenu : chestMenus) {
-                if(chestMenu.getInventory() == ce.getInventory()) {
+                if(chestMenu.getInventory().equals(ce.getInventory())) {
                     int slot = ce.getSlot();
                     if (slot < 9 * chestMenu.getRows()) {
                         ce.setCancelled(true);
@@ -368,9 +368,9 @@ public class ChestMenu {
                                 chestMenu.getOnNumber().accept(ce);
                                 item.getOnNumber().accept(ce);
                         }
-
-                        break;
                     }
+
+                    break;
                 }
             }
         }
@@ -378,7 +378,7 @@ public class ChestMenu {
         @EventHandler
         public void onOpen(InventoryOpenEvent ie) {
             for (ChestMenu menu : chestMenus) {
-                if (menu.getInventory() == ie.getInventory()) {
+                if (menu.getInventory().equals(ie.getInventory())) {
                     menu.getOnOpen().accept(ie);
                     Bukkit.getScheduler().runTask(this.plugin, menu::handlesUpdateItemsTask);
                     break;
@@ -392,7 +392,7 @@ public class ChestMenu {
 
             while (iterator.hasNext()) {
                 ChestMenu menu = iterator.next();
-                if (ie.getInventory() == menu.getInventory()) {
+                if (ie.getInventory().equals(menu.getInventory())) {
                     menu.getOnClose().accept(ie);
                     Bukkit.getScheduler().runTask(this.plugin, () -> {
                         if (!menu.hasViewers()) iterator.remove();

@@ -1,4 +1,4 @@
-# Seal Menus
+# Seal Menus [![](https://jitpack.io/v/seal-island/sealmenus.svg)](https://jitpack.io/#seal-island/sealmenus)
 API for creating Inventory Menus for Bukkit and Sponge.
 
 ## Index

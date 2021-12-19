@@ -92,6 +92,7 @@ public class PageableChestMenu extends ChestMenu {
      * Override all pageable items of this menu.
      *
      * @param items the items to set.
+     * @return this menu.
      */
     public PageableChestMenu setPageableItems(List<MenuItem> items) {
         this.pageableItems.clear();

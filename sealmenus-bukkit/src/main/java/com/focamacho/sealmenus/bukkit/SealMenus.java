@@ -14,7 +14,8 @@ public final class SealMenus {
      * Creates a chest menu.
      * @param title the inventory title.
      * @param rows the amount of rows, needs to
-     *             be >= 1 && <= 6.
+     *             be greater or equal to 1 and
+     *             less or equal to 6.
      * @param plugin the instance of the plugin
      *               creating this menu.
      * @return the created ChestMenu.
@@ -28,7 +29,8 @@ public final class SealMenus {
      * Creates a pageable chest menu.
      * @param title the inventory title.
      * @param rows the amount of rows, needs to
-     *             be >= 1 && <= 6.
+     *             be greater or equals to 1 and
+     *             less or equals to 6.
      * @param itemSlots the slots where the items will
      *                  be. When all slots are filled, a
      *                  new page is created.

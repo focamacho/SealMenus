@@ -157,6 +157,7 @@ public class ChestMenu {
      * Override all items of this menu.
      *
      * @param items the items to set.
+     * @return this menu.
      */
     public ChestMenu setItems(Map<Integer, MenuItem> items) {
         this.items.clear();
@@ -167,6 +168,7 @@ public class ChestMenu {
 
     /**
      * Remove all items of this menu.
+     * @return this menu.
      */
     public ChestMenu clearItems() {
         items.clear();
@@ -203,6 +205,8 @@ public class ChestMenu {
     /**
      * Updates a specific slot of
      * this menu.
+     *
+     * @param slot the slot to update.
      */
     public void update(int slot) {
         if(this.inventory == null) update();
@@ -241,6 +245,8 @@ public class ChestMenu {
 
     /**
      * Open this menu for a player.
+     *
+     * @param player the desired player.
      */
     public void open(Player player) {
         if(this.inventory == null) update();

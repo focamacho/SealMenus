@@ -104,6 +104,17 @@ public class PageableChestMenu extends ChestMenu {
     }
 
     /**
+     * Remove all pageable items of this menu.
+     *
+     * @return this menu.
+     */
+    public PageableChestMenu clearPageableItems() {
+        this.pageableItems.clear();
+        requireUpdate(null);
+        return this;
+    }
+
+    /**
      * Get the quantity of pages of this menu.
      * The quantity is defined by the amount
      * of items inserted.

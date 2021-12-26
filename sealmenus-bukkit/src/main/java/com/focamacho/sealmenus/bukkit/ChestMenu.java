@@ -11,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -328,6 +329,9 @@ public class ChestMenu {
         public void onClick(InventoryClickEvent ce) {
             for (ChestMenu chestMenu : chestMenus) {
                 if(chestMenu.getInventory().equals(ce.getInventory())) {
+                    // Prevent inventory double clicks from stealing items from the menu
+                    if(ce.getClick() == ClickType.DOUBLE_CLICK) ce.setCancelled(true);
+
                     int slot = ce.getSlot();
                     if (slot < 9 * chestMenu.getRows()) {
                         ce.setCancelled(true);

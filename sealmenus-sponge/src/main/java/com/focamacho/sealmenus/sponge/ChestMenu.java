@@ -195,6 +195,9 @@ public class ChestMenu {
                     .property(InventoryTitle.of(Text.of(this.title)))
                     .property(InventoryDimension.of(this.rows, 9))
                     .listener(ClickInventoryEvent.class, ce -> {
+                        // Prevent inventory double clicks from stealing items from the menu
+                        if(ce instanceof ClickInventoryEvent.Double) ce.setCancelled(true);
+
                         if(ce.getSlot().isPresent()) {
                             Integer slot = ce.getSlot().get().getInventoryProperty(SlotIndex.class).get().getValue();
                             if(slot == null) slot = -1;

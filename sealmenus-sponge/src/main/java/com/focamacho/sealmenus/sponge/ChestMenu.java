@@ -198,45 +198,52 @@ public class ChestMenu {
                         // Prevent inventory double clicks from stealing items from the menu
                         if(ce instanceof ClickInventoryEvent.Double) ce.setCancelled(true);
 
-                        if(ce.getSlot().isPresent()) {
-                            Integer slot = ce.getSlot().get().getInventoryProperty(SlotIndex.class).get().getValue();
-                            if(slot == null) slot = -1;
-                            if(slot < 9 * this.rows) {
-                                ce.setCancelled(true);
+                        // Prevent dragging items from placing items inside the menu
+                        if(ce instanceof ClickInventoryEvent.Drag) ce.setCancelled(true);
 
-                                this.getOnClick().accept(ce);
+                        // Prevent weird things from happening when sponge do not send the slot in the event
+                        if(!ce.getSlot().isPresent()) {
+                            ce.setCancelled(true);
+                            return;
+                        }
 
-                                MenuItem item = getItem(slot);
-                                if(item == null) item = dummyItem;
+                        Integer slot = ce.getSlot().get().getInventoryProperty(SlotIndex.class).get().getValue();
+                        if(slot == null) slot = -1;
+                        if(slot < 9 * this.rows) {
+                            ce.setCancelled(true);
 
-                                if(ce instanceof ClickInventoryEvent.Double) {
-                                    this.getOnDouble().accept((ClickInventoryEvent.Double) ce);
-                                    item.getOnDouble().accept((ClickInventoryEvent.Double) ce);
-                                } else if(ce instanceof ClickInventoryEvent.Shift.Primary) {
-                                    this.getOnShiftPrimary().accept((ClickInventoryEvent.Shift.Primary) ce);
-                                    item.getOnShiftPrimary().accept((ClickInventoryEvent.Shift.Primary) ce);
-                                } else if(ce instanceof ClickInventoryEvent.Shift.Secondary) {
-                                    this.getOnShiftSecondary().accept((ClickInventoryEvent.Shift.Secondary) ce);
-                                    item.getOnShiftSecondary().accept((ClickInventoryEvent.Shift.Secondary) ce);
-                                } else if(ce instanceof ClickInventoryEvent.Primary) {
-                                    this.getOnPrimary().accept((ClickInventoryEvent.Primary) ce);
-                                    item.getOnPrimary().accept((ClickInventoryEvent.Primary) ce);
-                                } else if(ce instanceof ClickInventoryEvent.Middle) {
-                                    this.getOnMiddle().accept((ClickInventoryEvent.Middle) ce);
-                                    item.getOnMiddle().accept((ClickInventoryEvent.Middle) ce);
-                                } else if(ce instanceof ClickInventoryEvent.Secondary) {
-                                    this.getOnSecondary().accept((ClickInventoryEvent.Secondary) ce);
-                                    item.getOnSecondary().accept((ClickInventoryEvent.Secondary) ce);
-                                } else if(ce instanceof ClickInventoryEvent.Drop.Full) {
-                                    this.getOnDropAll().accept((ClickInventoryEvent.Drop.Full) ce);
-                                    item.getOnDropAll().accept((ClickInventoryEvent.Drop.Full) ce);
-                                } else if(ce instanceof ClickInventoryEvent.Drop) {
-                                    this.getOnDrop().accept((ClickInventoryEvent.Drop.Single) ce);
-                                    item.getOnDrop().accept((ClickInventoryEvent.Drop.Single) ce);
-                                } else if(ce instanceof ClickInventoryEvent.NumberPress) {
-                                    this.getOnNumber().accept((ClickInventoryEvent.NumberPress) ce);
-                                    item.getOnNumber().accept((ClickInventoryEvent.NumberPress) ce);
-                                }
+                            this.getOnClick().accept(ce);
+
+                            MenuItem item = getItem(slot);
+                            if(item == null) item = dummyItem;
+
+                            if(ce instanceof ClickInventoryEvent.Double) {
+                                this.getOnDouble().accept((ClickInventoryEvent.Double) ce);
+                                item.getOnDouble().accept((ClickInventoryEvent.Double) ce);
+                            } else if(ce instanceof ClickInventoryEvent.Shift.Primary) {
+                                this.getOnShiftPrimary().accept((ClickInventoryEvent.Shift.Primary) ce);
+                                item.getOnShiftPrimary().accept((ClickInventoryEvent.Shift.Primary) ce);
+                            } else if(ce instanceof ClickInventoryEvent.Shift.Secondary) {
+                                this.getOnShiftSecondary().accept((ClickInventoryEvent.Shift.Secondary) ce);
+                                item.getOnShiftSecondary().accept((ClickInventoryEvent.Shift.Secondary) ce);
+                            } else if(ce instanceof ClickInventoryEvent.Primary) {
+                                this.getOnPrimary().accept((ClickInventoryEvent.Primary) ce);
+                                item.getOnPrimary().accept((ClickInventoryEvent.Primary) ce);
+                            } else if(ce instanceof ClickInventoryEvent.Middle) {
+                                this.getOnMiddle().accept((ClickInventoryEvent.Middle) ce);
+                                item.getOnMiddle().accept((ClickInventoryEvent.Middle) ce);
+                            } else if(ce instanceof ClickInventoryEvent.Secondary) {
+                                this.getOnSecondary().accept((ClickInventoryEvent.Secondary) ce);
+                                item.getOnSecondary().accept((ClickInventoryEvent.Secondary) ce);
+                            } else if(ce instanceof ClickInventoryEvent.Drop.Full) {
+                                this.getOnDropAll().accept((ClickInventoryEvent.Drop.Full) ce);
+                                item.getOnDropAll().accept((ClickInventoryEvent.Drop.Full) ce);
+                            } else if(ce instanceof ClickInventoryEvent.Drop) {
+                                this.getOnDrop().accept((ClickInventoryEvent.Drop.Single) ce);
+                                item.getOnDrop().accept((ClickInventoryEvent.Drop.Single) ce);
+                            } else if(ce instanceof ClickInventoryEvent.NumberPress) {
+                                this.getOnNumber().accept((ClickInventoryEvent.NumberPress) ce);
+                                item.getOnNumber().accept((ClickInventoryEvent.NumberPress) ce);
                             }
                         }
                     })

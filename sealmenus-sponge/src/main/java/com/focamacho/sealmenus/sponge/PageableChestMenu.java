@@ -132,7 +132,7 @@ public class PageableChestMenu extends ChestMenu {
      * @return this menu.
      */
     public PageableChestMenu setNextPageItem(ItemStack item, int slot) {
-        if(slot <= 0 || slot >= this.getRows() * 9) throw new IllegalArgumentException("The slot can't be less than zero or greater than the inventory size.");
+        if(slot < 0 || slot >= this.getRows() * 9) throw new IllegalArgumentException("The slot can't be less than zero or greater than the inventory size.");
         for(int slotIndex : itemSlots) {
             if(slot == slotIndex) throw new IllegalArgumentException("You can't add an item in a slot reserved for pageable items. Use PageableChestMenu#addPageableItem instead.");
         }
@@ -169,7 +169,7 @@ public class PageableChestMenu extends ChestMenu {
      * @return this menu.
      */
     public PageableChestMenu setPreviousPageItem(ItemStack item, int slot) {
-        if(slot <= 0 || slot >= this.getRows() * 9) throw new IllegalArgumentException("The slot can't be less than zero or greater than the inventory size.");
+        if(slot < 0 || slot >= this.getRows() * 9) throw new IllegalArgumentException("The slot can't be less than zero or greater than the inventory size.");
         for(int slotIndex : itemSlots) {
             if(slot == slotIndex) throw new IllegalArgumentException("You can't add an item in a slot reserved for pageable items. Use PageableChestMenu#addPageableItem instead.");
         }

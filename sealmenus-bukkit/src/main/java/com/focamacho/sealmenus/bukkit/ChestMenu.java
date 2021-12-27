@@ -72,7 +72,7 @@ public class ChestMenu {
      * @return this menu.
      */
     public ChestMenu addItem(MenuItem item, int slot) {
-        if(slot <= 0 || slot >= this.rows * 9) throw new IllegalArgumentException("The slot can't be less than zero or greater than the inventory size.");
+        if(slot < 0 || slot >= this.rows * 9) throw new IllegalArgumentException("The slot can't be less than zero or greater than the inventory size.");
 
         items.put(slot, item);
         requireUpdate(slot);

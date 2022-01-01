@@ -58,12 +58,24 @@ public class PageableChestMenu extends ChestMenu {
      * to pre-set slots for pageable items.
      *
      * @param item the item to add.
+     * @param index the index to put the item in.
+     * @return this menu.
+     */
+    public PageableChestMenu addPageableItem(MenuItem item, int index) {
+        pageableItems.add(Math.min(index, pageableItems.size()), item);
+        requireUpdate(null);
+        return this;
+    }
+
+    /**
+     * Adds an item that will automatically go
+     * to pre-set slots for pageable items.
+     *
+     * @param item the item to add.
      * @return this menu.
      */
     public PageableChestMenu addPageableItem(MenuItem item) {
-        pageableItems.add(item);
-        requireUpdate(null);
-        return this;
+        return addPageableItem(item, pageableItems.size());
     }
 
     /**
@@ -134,7 +146,7 @@ public class PageableChestMenu extends ChestMenu {
     public PageableChestMenu setNextPageItem(ItemStack item, int slot) {
         if(slot < 0 || slot >= this.getRows() * 9) throw new IllegalArgumentException("The slot can't be less than zero or greater than the inventory size.");
         for(int slotIndex : itemSlots) {
-            if(slot == slotIndex) throw new IllegalArgumentException("You can't add an item in a slot reserved for pageable items. Use PageableChestMenu#addPageableItem instead.");
+            if(slot == slotIndex) throw new IllegalArgumentException("You can't add an item in a slot reserved for pageable items.");
         }
 
         if(fatherMenu == null) mirrorMenus.forEach(menu -> menu.setNextPageItem(item, slot));
@@ -171,7 +183,7 @@ public class PageableChestMenu extends ChestMenu {
     public PageableChestMenu setPreviousPageItem(ItemStack item, int slot) {
         if(slot < 0 || slot >= this.getRows() * 9) throw new IllegalArgumentException("The slot can't be less than zero or greater than the inventory size.");
         for(int slotIndex : itemSlots) {
-            if(slot == slotIndex) throw new IllegalArgumentException("You can't add an item in a slot reserved for pageable items. Use PageableChestMenu#addPageableItem instead.");
+            if(slot == slotIndex) throw new IllegalArgumentException("You can't add an item in a slot reserved for pageable items.");
         }
 
         if(fatherMenu == null) mirrorMenus.forEach(menu -> menu.setPreviousPageItem(item, slot));
@@ -199,7 +211,7 @@ public class PageableChestMenu extends ChestMenu {
     @Override
     public ChestMenu addItem(MenuItem item, int slot) {
         for(int slotIndex : itemSlots) {
-            if(slot == slotIndex) throw new IllegalArgumentException("You can't add an item in a slot reserved for pageable items. Use PageableChestMenu#addPageableItem instead.");
+            if(slot == slotIndex) throw new IllegalArgumentException("You can't add an item in a slot reserved for pageable items.");
         }
 
         return super.addItem(item, slot);

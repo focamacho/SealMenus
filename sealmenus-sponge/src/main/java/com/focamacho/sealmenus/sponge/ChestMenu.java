@@ -201,6 +201,9 @@ public class ChestMenu {
                         // Prevent dragging items from placing items inside the menu
                         if(ce instanceof ClickInventoryEvent.Drag) ce.setCancelled(true);
 
+                        // Prevent Shift + Click from placing items inside the menu
+                        if(ce instanceof ClickInventoryEvent.Shift) ce.setCancelled(true);
+
                         // Prevent weird things from happening when sponge do not send the slot in the event
                         if(!ce.getSlot().isPresent()) {
                             ce.setCancelled(true);

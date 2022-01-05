@@ -332,6 +332,9 @@ public class ChestMenu {
                     // Prevent inventory double clicks from stealing items from the menu
                     if(ce.getClick() == ClickType.DOUBLE_CLICK) ce.setCancelled(true);
 
+                    // Prevent Shift + Click from placing items inside the menu
+                    if(ce.getClick() == ClickType.SHIFT_LEFT || ce.getClick() == ClickType.SHIFT_RIGHT) ce.setCancelled(true);
+
                     int slot = ce.getSlot();
                     if (slot < 9 * chestMenu.getRows()) {
                         ce.setCancelled(true);

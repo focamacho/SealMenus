@@ -3,6 +3,7 @@ package com.focamacho.sealmenus.bukkit;
 import com.focamacho.sealmenus.bukkit.item.ClickableItem;
 import com.focamacho.sealmenus.bukkit.item.MenuItem;
 import com.google.common.collect.Sets;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -55,7 +56,7 @@ public class ChestMenu {
     //Bukkit Inventory
     @Getter protected Inventory inventory;
     protected final Set<Integer> slotsRequiringUpdate = Sets.newHashSet();
-    private BukkitTask updateItemsTask = null;
+    @Getter(AccessLevel.PROTECTED) @Setter(AccessLevel.PROTECTED) private BukkitTask updateItemsTask = null;
 
     ChestMenu(String title, int rows, JavaPlugin plugin) {
         if(rows <= 0 || rows > 6) throw new IllegalArgumentException("The number of rows for a menu must be >= 1 && <= 6.");
@@ -293,20 +294,26 @@ public class ChestMenu {
     }
 
     protected void handlesUpdateItemsTask() {
-        if(this.updateItemsTask == null && hasViewers())
-            updateItemsTask = new BukkitRunnable() {
+        if(getUpdateItemsTask() == null && hasViewers())
+            setUpdateItemsTask(new BukkitRunnable() {
                 @Override
                 public void run() {
-                    items.forEach((slot, item) -> {
-                        if (item.update()) requireUpdate(slot);
-                    });
+                    handleUpdateItems();
 
                     if(!hasViewers()) {
                         this.cancel();
                         updateItemsTask = null;
                     }
                 }
-            }.runTaskTimer(this.plugin, 1, 1);
+            }.runTaskTimer(this.plugin, 1, 1));
+    }
+
+    protected void handleUpdateItems() {
+        getItems().forEach((slot, item) -> {
+            if (item.update()) {
+                requireUpdate(slot);
+            }
+        });
     }
 
     @RequiredArgsConstructor

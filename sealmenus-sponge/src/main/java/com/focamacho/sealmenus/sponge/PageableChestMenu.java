@@ -9,11 +9,9 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.util.Tuple;
 
-import java.util.AbstractMap;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class PageableChestMenu extends ChestMenu {
@@ -122,6 +120,22 @@ public class PageableChestMenu extends ChestMenu {
         this.pageableItems.clear();
         requireUpdate(null);
         return this;
+    }
+
+    /**
+     * Returns the slot for the inserted pageable item.
+     *
+     * @return the slot and page of the pageable item, or null if
+     * not present in the menu.
+     */
+    public Map.Entry<Integer, Integer> getPageableItemSlot(MenuItem item) {
+        if(!this.pageableItems.contains(item)) return null;
+
+        int indexOf = pageableItems.indexOf(item);
+        int page = (int) Math.floor((float) indexOf / itemSlots.length);
+        int slot = itemSlots[indexOf - (page * itemSlots.length)];
+
+        return new AbstractMap.SimpleEntry<>(page, slot);
     }
 
     /**
@@ -303,9 +317,32 @@ public class PageableChestMenu extends ChestMenu {
     }
 
     @Override
+    protected Task getUpdateItemsTask() {
+        if(fatherMenu == null) return super.getUpdateItemsTask();
+        else return fatherMenu.getUpdateItemsTask();
+    }
+
+    @Override
+    protected ChestMenu setUpdateItemsTask(Task updateItemsTask) {
+        if(fatherMenu == null) return super.setUpdateItemsTask(updateItemsTask);
+        else return fatherMenu.setUpdateItemsTask(updateItemsTask);
+    }
+
+    @Override
     protected void handlesUpdateItemsTask() {
         if(fatherMenu == null) super.handlesUpdateItemsTask();
         else fatherMenu.handlesUpdateItemsTask();
+    }
+
+    @Override
+    protected void handleUpdateItems() {
+        super.handleUpdateItems();
+
+        getPageableItems().forEach(item -> {
+            if(item.update()) {
+                requireUpdate(getPageableItemSlot(item).getValue());
+            }
+        });
     }
 
     //Override global actions for mirrored menus

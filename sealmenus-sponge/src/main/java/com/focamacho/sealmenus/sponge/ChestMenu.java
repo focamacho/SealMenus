@@ -4,6 +4,7 @@ import com.focamacho.sealmenus.sponge.item.ClickableItem;
 import com.focamacho.sealmenus.sponge.item.MenuItem;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -54,7 +55,7 @@ public class ChestMenu {
     @Getter protected Inventory inventory;
     protected List<Player> playersViewing = Lists.newArrayList();
     protected final Set<Integer> slotsRequiringUpdate = Sets.newHashSet();
-    private Task updateItemsTask = null;
+    @Getter(AccessLevel.PROTECTED) @Setter(AccessLevel.PROTECTED) private Task updateItemsTask = null;
 
     ChestMenu(String title, int rows, Object plugin) {
         if(rows <= 0 || rows > 6) throw new IllegalArgumentException("The number of rows for a menu must be >= 1 && <= 6.");
@@ -289,6 +290,7 @@ public class ChestMenu {
         for (Inventory inventorySlot : this.inventory.slots()) {
             Integer slotIndex = inventorySlot.getInventoryProperty(SlotIndex.class).get().getValue();
             if(Objects.equals(slot, slotIndex)) {
+                System.out.println("atualizando slot");
                 if(containsItem(slot)) {
                     ItemStack stack = getItem(slot).getItem();
                     if (inventorySlot.peek().orElse(ItemStack.empty()) != stack)
@@ -374,17 +376,23 @@ public class ChestMenu {
     }
 
     protected void handlesUpdateItemsTask() {
-        if(this.updateItemsTask == null && hasViewers())
-            updateItemsTask = Task.builder().intervalTicks(1).execute((task) -> {
-                items.forEach((slot, item) -> {
-                    if(item.update()) requireUpdate(slot);
-                });
+        if(getUpdateItemsTask() == null && hasViewers())
+            setUpdateItemsTask(Task.builder().intervalTicks(1).execute((task) -> {
+                handleUpdateItems();
 
                 if(!hasViewers()) {
                     task.cancel();
                     this.updateItemsTask = null;
                 }
-            }).submit(this.plugin);
+            }).submit(this.plugin));
+    }
+
+    protected void handleUpdateItems() {
+        getItems().forEach((slot, item) -> {
+            if(item.update()) {
+                requireUpdate(slot);
+            }
+        });
     }
 
 }

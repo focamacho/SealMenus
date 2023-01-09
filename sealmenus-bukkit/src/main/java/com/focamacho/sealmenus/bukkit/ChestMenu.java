@@ -187,17 +187,7 @@ public class ChestMenu {
         }
 
         for (int i = 0; i < this.inventory.getSize(); i++) {
-            final int finalIndex = i;
-
-            ItemStack slotStack = this.inventory.getItem(i);
-            if(slotStack == null) slotStack = new ItemStack(Material.AIR);
-
-            if(containsItem(i)) {
-                ItemStack stack = getItem(i).getItem();
-                if(slotStack != stack) Bukkit.getScheduler().runTask(this.plugin, () -> this.inventory.setItem(finalIndex, stack));
-            } else if(slotStack.getType() != Material.AIR) {
-                Bukkit.getScheduler().runTask(this.plugin, () -> this.inventory.clear(finalIndex));
-            }
+            updateSlotStack(i);
         }
 
         slotsRequiringUpdate.clear();
@@ -211,16 +201,7 @@ public class ChestMenu {
      */
     public void update(int slot) {
         if(this.inventory == null) update();
-
-        ItemStack inventoryStack = this.inventory.getItem(slot);
-        if(inventoryStack == null) inventoryStack = new ItemStack(Material.AIR);
-
-        if(containsItem(slot)) {
-            ItemStack stack = getItem(slot).getItem();
-            if (inventoryStack != stack)
-                Bukkit.getScheduler().runTask(this.plugin, () -> this.inventory.setItem(slot, stack));
-        } else if(inventoryStack.getType() != Material.AIR) Bukkit.getScheduler().runTask(this.plugin, () -> this.inventory.clear(slot));
-
+        updateSlotStack(slot);
         slotsRequiringUpdate.remove(slot);
     }
 
@@ -275,6 +256,17 @@ public class ChestMenu {
         return this.inventory.getViewers().size() > 0;
     }
 
+    private void updateSlotStack(int slot) {
+        ItemStack inventoryStack = this.inventory.getItem(slot);
+        if(inventoryStack == null) inventoryStack = new ItemStack(Material.AIR);
+
+        if(containsItem(slot)) {
+            ItemStack stack = getItem(slot).getItem();
+            if (inventoryStack != stack)
+                Bukkit.getScheduler().runTask(this.plugin, () -> this.inventory.setItem(slot, stack));
+        } else if(inventoryStack.getType() != Material.AIR) Bukkit.getScheduler().runTask(this.plugin, () -> this.inventory.clear(slot));
+    }
+
     /**
      * Creates a copy of this menu.
      * @return the copy of this menu.
@@ -323,7 +315,7 @@ public class ChestMenu {
         private static final MenuItem dummyItem = ClickableItem.create(new ItemStack(Material.AIR));
 
         private final JavaPlugin plugin;
-        private final Set<ChestMenu> chestMenus = Sets.newHashSet();
+        private final Set<ChestMenu> chestMenus = Collections.synchronizedSet(Sets.newHashSet());
 
         @EventHandler
         public void onClick(InventoryClickEvent ce) {

@@ -3,6 +3,7 @@ package com.focamacho.sealmenus.bukkit;
 import com.focamacho.sealmenus.bukkit.item.ClickableItem;
 import com.focamacho.sealmenus.bukkit.item.MenuItem;
 import com.google.common.collect.Sets;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -55,7 +56,7 @@ public class ChestMenu {
     //Bukkit Inventory
     @Getter protected Inventory inventory;
     protected final Set<Integer> slotsRequiringUpdate = Sets.newHashSet();
-    private BukkitTask updateItemsTask = null;
+    @Getter(AccessLevel.PROTECTED) @Setter(AccessLevel.PROTECTED) private BukkitTask updateItemsTask = null;
 
     ChestMenu(String title, int rows, JavaPlugin plugin) {
         if(rows <= 0 || rows > 6) throw new IllegalArgumentException("The number of rows for a menu must be >= 1 && <= 6.");
@@ -187,17 +188,7 @@ public class ChestMenu {
         }
 
         for (int i = 0; i < this.inventory.getSize(); i++) {
-            final int finalIndex = i;
-
-            ItemStack slotStack = this.inventory.getItem(i);
-            if(slotStack == null) slotStack = new ItemStack(Material.AIR);
-
-            if(containsItem(i)) {
-                ItemStack stack = getItem(i).getItem();
-                if(slotStack != stack) Bukkit.getScheduler().runTask(this.plugin, () -> this.inventory.setItem(finalIndex, stack));
-            } else if(slotStack.getType() != Material.AIR) {
-                Bukkit.getScheduler().runTask(this.plugin, () -> this.inventory.clear(finalIndex));
-            }
+            updateSlotStack(i);
         }
 
         slotsRequiringUpdate.clear();
@@ -211,16 +202,7 @@ public class ChestMenu {
      */
     public void update(int slot) {
         if(this.inventory == null) update();
-
-        ItemStack inventoryStack = this.inventory.getItem(slot);
-        if(inventoryStack == null) inventoryStack = new ItemStack(Material.AIR);
-
-        if(containsItem(slot)) {
-            ItemStack stack = getItem(slot).getItem();
-            if (inventoryStack != stack)
-                Bukkit.getScheduler().runTask(this.plugin, () -> this.inventory.setItem(slot, stack));
-        } else if(inventoryStack.getType() != Material.AIR) Bukkit.getScheduler().runTask(this.plugin, () -> this.inventory.clear(slot));
-
+        updateSlotStack(slot);
         slotsRequiringUpdate.remove(slot);
     }
 
@@ -275,6 +257,17 @@ public class ChestMenu {
         return this.inventory.getViewers().size() > 0;
     }
 
+    private void updateSlotStack(int slot) {
+        ItemStack inventoryStack = this.inventory.getItem(slot);
+        if(inventoryStack == null) inventoryStack = new ItemStack(Material.AIR);
+
+        if(containsItem(slot)) {
+            ItemStack stack = getItem(slot).getItem();
+            if (inventoryStack != stack)
+                Bukkit.getScheduler().runTask(this.plugin, () -> this.inventory.setItem(slot, stack));
+        } else if(inventoryStack.getType() != Material.AIR) Bukkit.getScheduler().runTask(this.plugin, () -> this.inventory.clear(slot));
+    }
+
     /**
      * Creates a copy of this menu.
      * @return the copy of this menu.
@@ -301,20 +294,26 @@ public class ChestMenu {
     }
 
     protected void handlesUpdateItemsTask() {
-        if(this.updateItemsTask == null && hasViewers())
-            updateItemsTask = new BukkitRunnable() {
+        if(getUpdateItemsTask() == null && hasViewers())
+            setUpdateItemsTask(new BukkitRunnable() {
                 @Override
                 public void run() {
-                    items.forEach((slot, item) -> {
-                        if (item.update()) requireUpdate(slot);
-                    });
+                    handleUpdateItems();
 
                     if(!hasViewers()) {
                         this.cancel();
                         updateItemsTask = null;
                     }
                 }
-            }.runTaskTimer(this.plugin, 1, 1);
+            }.runTaskTimer(this.plugin, 1, 1));
+    }
+
+    protected void handleUpdateItems() {
+        getItems().forEach((slot, item) -> {
+            if (item.update()) {
+                requireUpdate(slot);
+            }
+        });
     }
 
     @RequiredArgsConstructor
@@ -323,7 +322,7 @@ public class ChestMenu {
         private static final MenuItem dummyItem = ClickableItem.create(new ItemStack(Material.AIR));
 
         private final JavaPlugin plugin;
-        private final Set<ChestMenu> chestMenus = Sets.newHashSet();
+        private final Set<ChestMenu> chestMenus = Collections.synchronizedSet(Sets.newHashSet());
 
         @EventHandler
         public void onClick(InventoryClickEvent ce) {

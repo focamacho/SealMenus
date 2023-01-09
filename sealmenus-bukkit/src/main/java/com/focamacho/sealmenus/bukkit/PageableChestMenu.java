@@ -11,11 +11,9 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
-import java.util.AbstractMap;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class PageableChestMenu extends ChestMenu {
@@ -124,6 +122,22 @@ public class PageableChestMenu extends ChestMenu {
         this.pageableItems.clear();
         requireUpdate(null);
         return this;
+    }
+
+    /**
+     * Returns the slot for the inserted pageable item.
+     *
+     * @return the slot and page of the pageable item, or null if
+     * not present in the menu.
+     */
+    public Map.Entry<Integer, Integer> getPageableItemSlot(MenuItem item) {
+        if(!this.pageableItems.contains(item)) return null;
+
+        int indexOf = pageableItems.indexOf(item);
+        int page = (int) Math.floor((float) indexOf / itemSlots.length);
+        int slot = itemSlots[indexOf - (page * itemSlots.length)];
+
+        return new AbstractMap.SimpleEntry<>(page, slot);
     }
 
     /**
@@ -302,6 +316,35 @@ public class PageableChestMenu extends ChestMenu {
         getItems().forEach((slot, item) -> copy.addItem(item.copy(), slot));
         copy.setPageableItems(getPageableItems());
         return copy;
+    }
+
+    @Override
+    protected BukkitTask getUpdateItemsTask() {
+        if(fatherMenu == null) return super.getUpdateItemsTask();
+        else return fatherMenu.getUpdateItemsTask();
+    }
+
+    @Override
+    protected ChestMenu setUpdateItemsTask(BukkitTask updateItemsTask) {
+        if(fatherMenu == null) return super.setUpdateItemsTask(updateItemsTask);
+        else return fatherMenu.setUpdateItemsTask(updateItemsTask);
+    }
+
+    @Override
+    protected void handlesUpdateItemsTask() {
+        if(fatherMenu == null) super.handlesUpdateItemsTask();
+        else fatherMenu.handlesUpdateItemsTask();
+    }
+
+    @Override
+    protected void handleUpdateItems() {
+        super.handleUpdateItems();
+
+        getPageableItems().forEach(item -> {
+            if (item.update()) {
+                requireUpdate(getPageableItemSlot(item).getValue());
+            }
+        });
     }
 
     //Override global actions for mirrored menus

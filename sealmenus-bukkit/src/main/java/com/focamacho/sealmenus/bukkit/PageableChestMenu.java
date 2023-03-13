@@ -109,6 +109,7 @@ public class PageableChestMenu extends ChestMenu {
     public PageableChestMenu setPageableItems(List<MenuItem> items) {
         this.pageableItems.clear();
         pageableItems.addAll(items);
+        this.page = 0;
         requireUpdate(null);
         return this;
     }

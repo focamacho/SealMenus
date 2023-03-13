@@ -107,6 +107,7 @@ public class PageableChestMenu extends ChestMenu {
     public PageableChestMenu setPageableItems(List<MenuItem> items) {
         this.pageableItems.clear();
         pageableItems.addAll(items);
+        this.page = 0;
         requireUpdate(null);
         return this;
     }
@@ -142,10 +143,32 @@ public class PageableChestMenu extends ChestMenu {
      * Get the quantity of pages of this menu.
      * The quantity is defined by the amount
      * of items inserted.
+     *
      * @return the quantity of pages of this menu.
      */
     public int getPageCount() {
         return (int) Math.max(1, Math.ceil(this.pageableItems.size() / (double) itemSlots.length));
+    }
+
+    /**
+     * Get the current page the player
+     * is in.
+     *
+     * @param player the player to check the
+     *               page.
+     * @return the current page index.
+     */
+    public int getCurrentPage(Player player) {
+        if(this.fatherMenu != null && this.fatherMenu.playersViewing.contains(player)) {
+            return this.fatherMenu.page;
+        } else if(playersViewing.contains(player)) {
+            return this.page;
+        } else {
+            Optional<PageableChestMenu> menu = mirrorMenus.stream().filter(m -> m.playersViewing.contains(player)).findFirst();
+            if(menu.isPresent()) return menu.get().page;
+        }
+
+        return 0;
     }
 
     /**
@@ -279,11 +302,15 @@ public class PageableChestMenu extends ChestMenu {
 
     @Override
     public void open(Player player) {
+        open(player, 0);
+    }
+
+    public void open(Player player, int page) {
         if(this.inventory == null || !super.hasViewers()) {
-            this.page = 0;
+            this.page = Math.min(getPageCount() - 1, page);
             requireUpdate(null);
             super.open(player);
-        } else new PageableChestMenu(this).open(player);
+        } else new PageableChestMenu(this).open(player, page);
     }
 
     @Override

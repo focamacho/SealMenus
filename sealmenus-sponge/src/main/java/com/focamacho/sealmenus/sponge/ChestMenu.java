@@ -290,7 +290,6 @@ public class ChestMenu {
         for (Inventory inventorySlot : this.inventory.slots()) {
             Integer slotIndex = inventorySlot.getInventoryProperty(SlotIndex.class).get().getValue();
             if(Objects.equals(slot, slotIndex)) {
-                System.out.println("atualizando slot");
                 if(containsItem(slot)) {
                     ItemStack stack = getItem(slot).getItem();
                     if (inventorySlot.peek().orElse(ItemStack.empty()) != stack)

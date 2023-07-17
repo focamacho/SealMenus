@@ -322,7 +322,7 @@ public class ChestMenu {
         private static final MenuItem dummyItem = ClickableItem.create(new ItemStack(Material.AIR));
 
         private final JavaPlugin plugin;
-        private final Set<ChestMenu> chestMenus = Collections.synchronizedSet(Sets.newHashSet());
+        private final Set<ChestMenu> chestMenus = Sets.newConcurrentHashSet();
 
         @EventHandler
         public void onClick(InventoryClickEvent ce) {

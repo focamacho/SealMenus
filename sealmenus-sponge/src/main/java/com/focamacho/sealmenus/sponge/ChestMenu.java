@@ -21,6 +21,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 @SuppressWarnings({"unused", "UnusedReturnValue"})
@@ -49,7 +50,7 @@ public class ChestMenu {
     @Getter @Setter private Consumer<ClickInventoryEvent.NumberPress> onNumber = (click) -> {};
 
     //Items
-    protected Map<Integer, MenuItem> items = new HashMap<>();
+    protected Map<Integer, MenuItem> items = new ConcurrentHashMap<>();
 
     //Sponge Inventory
     @Getter protected Inventory inventory;

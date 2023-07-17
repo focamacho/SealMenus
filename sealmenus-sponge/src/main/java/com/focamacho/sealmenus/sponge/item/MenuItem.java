@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 /**
  * Base class for menu items.
  */
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Accessors(chain = true)
 public abstract class MenuItem {
 

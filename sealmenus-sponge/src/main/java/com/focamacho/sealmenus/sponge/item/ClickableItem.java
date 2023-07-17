@@ -9,6 +9,8 @@ import org.spongepowered.api.item.inventory.ItemStack;
  */
 public class ClickableItem extends MenuItem {
 
+    private boolean dirty = false;
+
     /**
      * Private constructor. Use the static method ClickableItem#create.
      */
@@ -23,6 +25,22 @@ public class ClickableItem extends MenuItem {
      */
     public static ClickableItem create(@NonNull ItemStack item) {
         return new ClickableItem(item);
+    }
+
+    @Override
+    public MenuItem setItem(@NonNull ItemStack item) {
+        this.dirty = true;
+        return super.setItem(item);
+    }
+
+    @Override
+    public boolean update() {
+        if(this.dirty) {
+            this.dirty = false;
+            return true;
+        }
+
+        return false;
     }
 
     @Override

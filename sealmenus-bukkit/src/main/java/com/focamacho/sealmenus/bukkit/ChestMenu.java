@@ -58,7 +58,7 @@ public class ChestMenu {
     protected final Set<Integer> slotsRequiringUpdate = Sets.newHashSet();
     @Getter(AccessLevel.PROTECTED) @Setter(AccessLevel.PROTECTED) private BukkitTask updateItemsTask = null;
 
-    ChestMenu(String title, int rows, JavaPlugin plugin) {
+    protected ChestMenu(String title, int rows, JavaPlugin plugin) {
         if(rows <= 0 || rows > 6) throw new IllegalArgumentException("The number of rows for a menu must be >= 1 && <= 6.");
 
         this.title = Objects.requireNonNull(title);

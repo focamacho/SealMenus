@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 public class PageableChestMenu extends ChestMenu {
 
     @Getter private final int[] itemSlots;
-    private List<MenuItem> pageableItems;
+    protected List<MenuItem> pageableItems;
 
     private int page;
 
@@ -29,7 +29,7 @@ public class PageableChestMenu extends ChestMenu {
     private List<PageableChestMenu> mirrorMenus = Lists.newArrayList();
     private PageableChestMenu fatherMenu;
 
-    PageableChestMenu(String title, int rows, int[] itemSlots, Object plugin) {
+    protected PageableChestMenu(String title, int rows, int[] itemSlots, Object plugin) {
         super(title, rows, plugin);
         this.itemSlots = itemSlots;
         this.page = 0;

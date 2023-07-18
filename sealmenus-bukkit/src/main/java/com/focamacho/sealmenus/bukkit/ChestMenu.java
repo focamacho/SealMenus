@@ -237,7 +237,7 @@ public class ChestMenu {
         Bukkit.getScheduler().runTask(this.plugin, () -> {
             if(slotsRequiringUpdate.size() > 0) {
                 if (slotsRequiringUpdate.contains(null)) update();
-                else slotsRequiringUpdate.forEach(this::update);
+                else new HashSet<>(slotsRequiringUpdate).forEach(this::update);
             }
 
             Listener listener = SealMenus.registeredListeners.get(this.plugin);

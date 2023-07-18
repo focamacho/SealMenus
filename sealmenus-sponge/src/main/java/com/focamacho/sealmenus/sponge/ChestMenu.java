@@ -334,7 +334,7 @@ public class ChestMenu {
         Task.builder().execute(() -> {
             if(slotsRequiringUpdate.size() > 0)
                 if(slotsRequiringUpdate.contains(null)) update();
-                else slotsRequiringUpdate.forEach(this::update);
+                else new HashSet<>(slotsRequiringUpdate).forEach(this::update);
             player.closeInventory();
             player.openInventory(this.inventory).ifPresent(container -> playersViewing.add(player));
         }).submit(this.plugin);

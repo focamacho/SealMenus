@@ -23,6 +23,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 @SuppressWarnings({"unused", "UnusedReturnValue"})
@@ -51,14 +52,14 @@ public class ChestMenu {
     @Getter @Setter private Consumer<InventoryClickEvent> onNumber = (click) -> {};
 
     //Items
-    protected Map<Integer, MenuItem> items = new HashMap<>();
+    protected Map<Integer, MenuItem> items = new ConcurrentHashMap<>();
 
     //Bukkit Inventory
     @Getter protected Inventory inventory;
     protected final Set<Integer> slotsRequiringUpdate = Sets.newHashSet();
     @Getter(AccessLevel.PROTECTED) @Setter(AccessLevel.PROTECTED) private BukkitTask updateItemsTask = null;
 
-    ChestMenu(String title, int rows, JavaPlugin plugin) {
+    protected ChestMenu(String title, int rows, JavaPlugin plugin) {
         if(rows <= 0 || rows > 6) throw new IllegalArgumentException("The number of rows for a menu must be >= 1 && <= 6.");
 
         this.title = Objects.requireNonNull(title);
@@ -236,7 +237,7 @@ public class ChestMenu {
         Bukkit.getScheduler().runTask(this.plugin, () -> {
             if(slotsRequiringUpdate.size() > 0) {
                 if (slotsRequiringUpdate.contains(null)) update();
-                else slotsRequiringUpdate.forEach(this::update);
+                else new HashSet<>(slotsRequiringUpdate).forEach(this::update);
             }
 
             Listener listener = SealMenus.registeredListeners.get(this.plugin);
@@ -322,7 +323,7 @@ public class ChestMenu {
         private static final MenuItem dummyItem = ClickableItem.create(new ItemStack(Material.AIR));
 
         private final JavaPlugin plugin;
-        private final Set<ChestMenu> chestMenus = Collections.synchronizedSet(Sets.newHashSet());
+        private final Set<ChestMenu> chestMenus = Sets.newConcurrentHashSet();
 
         @EventHandler
         public void onClick(InventoryClickEvent ce) {

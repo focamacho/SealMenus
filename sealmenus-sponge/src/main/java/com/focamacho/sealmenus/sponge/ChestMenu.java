@@ -21,6 +21,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 @SuppressWarnings({"unused", "UnusedReturnValue"})
@@ -49,7 +50,7 @@ public class ChestMenu {
     @Getter @Setter private Consumer<ClickInventoryEvent.NumberPress> onNumber = (click) -> {};
 
     //Items
-    protected Map<Integer, MenuItem> items = new HashMap<>();
+    protected Map<Integer, MenuItem> items = new ConcurrentHashMap<>();
 
     //Sponge Inventory
     @Getter protected Inventory inventory;
@@ -57,7 +58,7 @@ public class ChestMenu {
     protected final Set<Integer> slotsRequiringUpdate = Sets.newHashSet();
     @Getter(AccessLevel.PROTECTED) @Setter(AccessLevel.PROTECTED) private Task updateItemsTask = null;
 
-    ChestMenu(String title, int rows, Object plugin) {
+    protected ChestMenu(String title, int rows, Object plugin) {
         if(rows <= 0 || rows > 6) throw new IllegalArgumentException("The number of rows for a menu must be >= 1 && <= 6.");
 
         this.title = Objects.requireNonNull(title);
@@ -333,7 +334,7 @@ public class ChestMenu {
         Task.builder().execute(() -> {
             if(slotsRequiringUpdate.size() > 0)
                 if(slotsRequiringUpdate.contains(null)) update();
-                else slotsRequiringUpdate.forEach(this::update);
+                else new HashSet<>(slotsRequiringUpdate).forEach(this::update);
             player.closeInventory();
             player.openInventory(this.inventory).ifPresent(container -> playersViewing.add(player));
         }).submit(this.plugin);

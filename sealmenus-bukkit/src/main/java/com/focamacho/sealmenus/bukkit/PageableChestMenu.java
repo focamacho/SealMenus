@@ -205,7 +205,7 @@ public class PageableChestMenu extends ChestMenu {
                             if(this.page + 1 < getPageCount()) {
                                 this.page += 1;
                                 update();
-                                Bukkit.getScheduler().runTaskLater(this.plugin, () -> pageLocked = false, 10);
+                                Bukkit.getScheduler().runTaskLater(this.plugin, () -> pageLocked = false, 5);
                             }
                         });
                     }
@@ -246,7 +246,7 @@ public class PageableChestMenu extends ChestMenu {
                             if(this.page > 0) {
                                 this.page -= 1;
                                 update();
-                                Bukkit.getScheduler().runTaskLater(this.plugin, () -> pageLocked = false, 10);
+                                Bukkit.getScheduler().runTaskLater(this.plugin, () -> pageLocked = false, 5);
                             }
                         });
                     }

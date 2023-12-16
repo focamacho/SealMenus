@@ -205,7 +205,7 @@ public class PageableChestMenu extends ChestMenu {
                                 this.page += 1;
                                 update();
                                 Task.builder().execute(() -> pageLocked = false)
-                                        .delay(500, TimeUnit.MILLISECONDS)
+                                        .delayTicks(5)
                                         .submit(this.plugin);
                             }
                         }).submit(this.plugin);
@@ -248,7 +248,7 @@ public class PageableChestMenu extends ChestMenu {
                                 this.page -= 1;
                                 update();
                                 Task.builder().execute(() -> pageLocked = false)
-                                        .delay(500, TimeUnit.MILLISECONDS)
+                                        .delayTicks(5)
                                         .submit(this.plugin);
                             }
                         }).submit(this.plugin);

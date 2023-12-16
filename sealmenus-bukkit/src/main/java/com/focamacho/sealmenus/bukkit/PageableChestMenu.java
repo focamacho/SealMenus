@@ -31,6 +31,10 @@ public class PageableChestMenu extends ChestMenu {
     private List<PageableChestMenu> mirrorMenus = Lists.newArrayList();
     private PageableChestMenu fatherMenu;
 
+    // Prevents clicking to the next/previous pages buttons while true.
+    // Avoids visually glitching the menu by clicking too fast.
+    private boolean pageLocked = false;
+
     protected PageableChestMenu(String title, int rows, int[] itemSlots, JavaPlugin plugin) {
         super(title, rows, plugin);
         this.itemSlots = itemSlots;
@@ -193,11 +197,15 @@ public class PageableChestMenu extends ChestMenu {
         Integer oldSlot = nextPageItem != null ? nextPageItem.getKey() : null;
         nextPageItem = new AbstractMap.SimpleEntry<>(slot, ClickableItem.create(item)
                 .setOnPrimary(click -> {
+                    if(pageLocked) return;
+
                     if(click.getWhoClicked() instanceof Player) {
+                        pageLocked = true;
                         Bukkit.getScheduler().runTask(this.plugin, () -> {
                             if(this.page + 1 < getPageCount()) {
                                 this.page += 1;
                                 update();
+                                pageLocked = false;
                             }
                         });
                     }
@@ -230,11 +238,15 @@ public class PageableChestMenu extends ChestMenu {
         Integer oldSlot = previousPageItem != null ? previousPageItem.getKey() : null;
         previousPageItem = new AbstractMap.SimpleEntry<>(slot, ClickableItem.create(item)
                 .setOnPrimary(click -> {
+                    if(pageLocked) return;
+
                     if(click.getWhoClicked() instanceof Player) {
+                        pageLocked = true;
                         Bukkit.getScheduler().runTask(this.plugin, () -> {
                             if(this.page > 0) {
                                 this.page -= 1;
                                 update();
+                                pageLocked = false;
                             }
                         });
                     }

@@ -12,6 +12,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Tuple;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class PageableChestMenu extends ChestMenu {
@@ -203,7 +204,9 @@ public class PageableChestMenu extends ChestMenu {
                             if(this.page + 1 < getPageCount()) {
                                 this.page += 1;
                                 update();
-                                pageLocked = false;
+                                Task.builder().execute(() -> pageLocked = false)
+                                        .delay(500, TimeUnit.MILLISECONDS)
+                                        .submit(this.plugin);
                             }
                         }).submit(this.plugin);
                     }
@@ -244,7 +247,9 @@ public class PageableChestMenu extends ChestMenu {
                             if(this.page > 0) {
                                 this.page -= 1;
                                 update();
-                                pageLocked = false;
+                                Task.builder().execute(() -> pageLocked = false)
+                                        .delay(500, TimeUnit.MILLISECONDS)
+                                        .submit(this.plugin);
                             }
                         }).submit(this.plugin);
                     }

@@ -34,6 +34,7 @@ public class ChestMenu {
     @Getter private final String title;
     @Getter private final int rows;
     protected final Object plugin;
+    private boolean inventoryClicks = false;
 
     //Global actions
     @Getter @Setter private Consumer<InteractInventoryEvent.Open> onOpen = (interact) -> {};
@@ -214,7 +215,7 @@ public class ChestMenu {
 
                         Integer slot = ce.getSlot().get().getInventoryProperty(SlotIndex.class).get().getValue();
                         if(slot == null) slot = -1;
-                        if(slot < 9 * this.rows) {
+                        if(inventoryClicks || slot < 9 * this.rows) {
                             ce.setCancelled(true);
 
                             this.getOnClick().accept(ce);
@@ -277,6 +278,14 @@ public class ChestMenu {
         }
 
         slotsRequiringUpdate.clear();
+    }
+
+    /**
+     * Marks this menu to be able to receive click events fired
+     * when clicking an item in their own inventory.
+     */
+    public void receiveInventoryClicks() {
+        this.inventoryClicks = true;
     }
 
     /**

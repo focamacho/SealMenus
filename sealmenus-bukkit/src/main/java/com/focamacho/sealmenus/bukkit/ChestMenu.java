@@ -35,6 +35,7 @@ public class ChestMenu {
     //Base properties
     @Getter private final String title;
     @Getter private final int rows;
+    private boolean inventoryClicks = false;
     protected final JavaPlugin plugin;
 
     //Global actions
@@ -196,6 +197,14 @@ public class ChestMenu {
     }
 
     /**
+     * Marks this menu to be able to receive click events fired
+     * when clicking an item in their own inventory.
+     */
+    public void receiveInventoryClicks() {
+        this.inventoryClicks = true;
+    }
+
+    /**
      * Updates a specific slot of
      * this menu.
      *
@@ -336,7 +345,7 @@ public class ChestMenu {
                     if(ce.getClick() == ClickType.SHIFT_LEFT || ce.getClick() == ClickType.SHIFT_RIGHT) ce.setCancelled(true);
 
                     int slot = ce.getSlot();
-                    if (slot < 9 * chestMenu.getRows()) {
+                    if (chestMenu.inventoryClicks || slot < 9 * chestMenu.getRows()) {
                         ce.setCancelled(true);
 
                         chestMenu.getOnClick().accept(ce);

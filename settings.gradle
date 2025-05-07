@@ -1,6 +1,5 @@
 rootProject.name = 'sealmenus'
 
-include 'bukkit', 'sponge'
+include 'bukkit'
 
 project(":bukkit").projectDir = file("sealmenus-bukkit")
-project(":sponge").projectDir = file("sealmenus-sponge")

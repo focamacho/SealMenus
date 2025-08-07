@@ -1,4 +1,10 @@
 allprojects {
+    buildscript {
+        repositories {
+            maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+        }
+    }
+
     group = 'com.focamacho'
     version = '1.1.0'
 }

@@ -18,6 +18,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -344,7 +345,7 @@ public class ChestMenu {
                     // Prevent Shift + Click from placing items inside the menu
                     if(ce.getClick() == ClickType.SHIFT_LEFT || ce.getClick() == ClickType.SHIFT_RIGHT) ce.setCancelled(true);
 
-                    int slot = ce.getSlot();
+                    int slot = ce.getRawSlot();
                     if (chestMenu.inventoryClicks || slot < 9 * chestMenu.getRows()) {
                         ce.setCancelled(true);
 

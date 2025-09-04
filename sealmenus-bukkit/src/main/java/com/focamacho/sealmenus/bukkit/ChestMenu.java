@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -34,7 +35,7 @@ public class ChestMenu {
     private static final MenuItem dummyItem = ClickableItem.create(new ItemStack(Material.AIR));
 
     //Base properties
-    @Getter private final String title;
+    @Getter private final Component title;
     @Getter private final int rows;
     private boolean inventoryClicks = false;
     protected final JavaPlugin plugin;
@@ -61,12 +62,16 @@ public class ChestMenu {
     protected final Set<Integer> slotsRequiringUpdate = Sets.newHashSet();
     @Getter(AccessLevel.PROTECTED) @Setter(AccessLevel.PROTECTED) private BukkitTask updateItemsTask = null;
 
-    protected ChestMenu(String title, int rows, JavaPlugin plugin) {
+    protected ChestMenu(Component title, int rows, JavaPlugin plugin) {
         if(rows <= 0 || rows > 6) throw new IllegalArgumentException("The number of rows for a menu must be >= 1 && <= 6.");
 
         this.title = Objects.requireNonNull(title);
         this.rows = rows;
         this.plugin = Objects.requireNonNull(plugin);
+    }
+
+    protected ChestMenu(String title, int rows, JavaPlugin plugin) {
+        this(Component.text(title), rows, plugin);
     }
 
     /**

@@ -4,6 +4,7 @@ import com.focamacho.sealmenus.bukkit.item.ClickableItem;
 import com.focamacho.sealmenus.bukkit.item.MenuItem;
 import com.google.common.collect.Lists;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -35,12 +36,16 @@ public class PageableChestMenu extends ChestMenu {
     // Avoids visually glitching the menu by clicking too fast.
     private boolean pageLocked = false;
 
-    protected PageableChestMenu(String title, int rows, int[] itemSlots, JavaPlugin plugin) {
+    protected PageableChestMenu(Component title, int rows, int[] itemSlots, JavaPlugin plugin) {
         super(title, rows, plugin);
         this.itemSlots = itemSlots;
         this.page = 0;
         this.pageableItems = Lists.newArrayList();
         this.fatherMenu = null;
+    }
+
+    protected PageableChestMenu(String title, int rows, int[] itemSlots, JavaPlugin plugin) {
+        this(Component.text(title), rows, itemSlots, plugin);
     }
 
     // Constructor for mirror menus

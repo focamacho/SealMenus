@@ -34,6 +34,9 @@ public class PageableChestMenu extends ChestMenu {
     // Avoids visually glitching the menu by clicking too fast.
     private boolean pageLocked = false;
 
+    // Ticks the next/previous page buttons stay locked after a click.
+    @Getter private int pageClickCooldownTicks = 5;
+
     protected PageableChestMenu(String title, int rows, int[] itemSlots, Object plugin) {
         super(title, rows, plugin);
         this.itemSlots = itemSlots;
@@ -47,6 +50,7 @@ public class PageableChestMenu extends ChestMenu {
         this(father.getTitle(), father.getRows(), father.getItemSlots(), father.plugin);
         this.items = father.items;
         this.pageableItems = father.pageableItems;
+        this.pageClickCooldownTicks = father.pageClickCooldownTicks;
 
         if(father.nextPageItem != null) this.setNextPageItem(father.nextPageItem.getValue().getItem(), father.nextPageItem.getKey());
         if(father.previousPageItem != null) this.setPreviousPageItem(father.previousPageItem.getValue().getItem(), father.previousPageItem.getKey());
@@ -196,20 +200,7 @@ public class PageableChestMenu extends ChestMenu {
         Integer oldSlot = nextPageItem != null ? nextPageItem.getKey() : null;
         nextPageItem = new AbstractMap.SimpleEntry<>(slot, ClickableItem.create(item)
                 .setOnPrimary(click -> {
-                    if(pageLocked) return;
-
-                    if(click.getSource() instanceof Player) {
-                        pageLocked = true;
-                        Task.builder().execute(() -> {
-                            if(this.page + 1 < getPageCount()) {
-                                this.page += 1;
-                                update();
-                                Task.builder().execute(() -> pageLocked = false)
-                                        .delayTicks(5)
-                                        .submit(this.plugin);
-                            }
-                        }).submit(this.plugin);
-                    }
+                    if(click.getSource() instanceof Player) goToNextPage();
                 })
         );
 
@@ -239,20 +230,7 @@ public class PageableChestMenu extends ChestMenu {
         Integer oldSlot = previousPageItem != null ? previousPageItem.getKey() : null;
         previousPageItem = new AbstractMap.SimpleEntry<>(slot, ClickableItem.create(item)
                 .setOnPrimary(click -> {
-                    if(pageLocked) return;
-
-                    if(click.getSource() instanceof Player) {
-                        pageLocked = true;
-                        Task.builder().execute(() -> {
-                            if(this.page > 0) {
-                                this.page -= 1;
-                                update();
-                                Task.builder().execute(() -> pageLocked = false)
-                                        .delayTicks(5)
-                                        .submit(this.plugin);
-                            }
-                        }).submit(this.plugin);
-                    }
+                    if(click.getSource() instanceof Player) goToPreviousPage();
                 })
         );
 
@@ -387,6 +365,83 @@ public class PageableChestMenu extends ChestMenu {
                 requireUpdate(getPageableItemSlot(item).getValue());
             }
         });
+    }
+
+    /**
+     * Sets the silent cooldown (in ticks) between page-change clicks.
+     * Clicks received while the cooldown is active are dropped silently.
+     * Mirrors inherit this value from the father menu.
+     *
+     * @param ticks cooldown duration in ticks. Must be &gt;= 0.
+     * @return this menu.
+     */
+    public PageableChestMenu setPageClickCooldown(int ticks) {
+        if(ticks < 0) throw new IllegalArgumentException("Cooldown ticks must be >= 0.");
+        this.pageClickCooldownTicks = ticks;
+        if(fatherMenu == null) mirrorMenus.forEach(menu -> menu.pageClickCooldownTicks = ticks);
+        return this;
+    }
+
+    /**
+     * Advances to the next page. Called by the next-page button click.
+     * Subclasses can override this to perform async work before/after the page change.
+     */
+    protected void goToNextPage() {
+        if(pageLocked) return;
+        pageLocked = true;
+        Task.builder().execute(() -> {
+            if(this.page + 1 < getPageCount()) {
+                this.page += 1;
+                update();
+            }
+            scheduleCooldownUnlock();
+        }).submit(this.plugin);
+    }
+
+    /**
+     * Returns to the previous page. Called by the previous-page button click.
+     * Subclasses can override this to perform async work before/after the page change.
+     */
+    protected void goToPreviousPage() {
+        if(pageLocked) return;
+        pageLocked = true;
+        Task.builder().execute(() -> {
+            if(this.page > 0) {
+                this.page -= 1;
+                update();
+            }
+            scheduleCooldownUnlock();
+        }).submit(this.plugin);
+    }
+
+    /**
+     * Schedules pageLocked to be set back to false after pageClickCooldownTicks ticks.
+     * The unlock is always posted to the server main thread.
+     */
+    protected void scheduleCooldownUnlock() {
+        if(pageClickCooldownTicks <= 0) {
+            Task.builder().execute(() -> pageLocked = false).submit(this.plugin);
+            return;
+        }
+        Task.builder().execute(() -> pageLocked = false)
+                .delayTicks(pageClickCooldownTicks)
+                .submit(this.plugin);
+    }
+
+    protected boolean isPageLocked() {
+        return pageLocked;
+    }
+
+    protected void setPageLocked(boolean locked) {
+        this.pageLocked = locked;
+    }
+
+    protected int getCurrentPageIndex() {
+        return this.page;
+    }
+
+    protected void setCurrentPageIndex(int page) {
+        this.page = page;
     }
 
     //Override global actions for mirrored menus
